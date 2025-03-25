@@ -1,0 +1,9 @@
+spidev==3.5
+RPi.GPIO==0.7.1
+numpy>=1.19.0
+gpiozero==1.6.2
+Pillow>=8.0.0
+pymouse==1.0
+pyusb==1.2.1
+psutil==5.9.0
+smbus2>=0.4.1 

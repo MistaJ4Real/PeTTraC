@@ -1,0 +1,190 @@
+﻿Raspberry Pi Zero 2 W GPIO Mapping:
+Pin
+	GPIO
+	Function / Connection
+	1
+	3.3V
+	Power (for logic)
+	2
+	5V
+	Power (for peripherals)
+	3
+	GPIO2
+	I²C SDA (PiSugar 3 UPS)
+	4
+	5V
+	Power
+	5
+	GPIO3
+	I²C SCL (PiSugar 3 UPS)
+	6
+	GND
+	Ground
+	7
+	GPIO4
+	Laser MOSFET Gate Control
+	8
+	GPIO14
+	UART TX (TF-Luna RX)
+	9
+	GND
+	Ground
+	10
+	GPIO15
+	UART RX (TF-Luna TX)
+	11
+	GPIO17
+	Available
+	12
+	GPIO18
+	LCD Backlight
+	13
+	GPIO27
+	LCD Reset
+	14
+	GND
+	Ground
+	15
+	GPIO22
+	Available
+	16
+	GPIO23
+	Available
+	17
+	3.3V
+	Power (for logic circuits)
+	18
+	GPIO24
+	LCD Backlight Control
+	19
+	GPIO10
+	SPI MOSI (LCD)
+	20
+	GND
+	Ground
+	21
+	GPIO21
+	LCD KEY1
+	22
+	GPIO25
+	LCD D/C (Data/Command)
+	23
+	GPIO11
+	SPI SCLK (LCD)
+	24
+	GPIO8
+	SPI CS (LCD)
+	25
+	GND
+	Ground
+	26
+	GPIO26
+	LCD Joystick Right
+	27
+	ID_SD
+	I²C EEPROM (Reserved)
+	28
+	ID_SC
+	I²C EEPROM (Reserved)
+	29
+	GPIO5
+	LCD Joystick Left
+	30
+	GND
+	Ground
+	31
+	GPIO6
+	LCD Joystick Up
+	32
+	GPIO12
+	Available
+	33
+	GPIO13
+	LCD Joystick Press
+	34
+	GND
+	Ground
+	35
+	GPIO19
+	LCD Joystick Down
+	36
+	GPIO16
+	LCD KEY3
+	37
+	GPIO26
+	LCD Joystick Right
+	38
+	GPIO20
+	LCD KEY2
+	39
+	GND
+	Ground
+	40
+	GPIO21
+	LCD KEY1
+	
+
+________________
+
+
+Raspberry Pi Pins Used
+1. Pin 2 (5 V)
+
+   * Powers the laser module (positive side)
+   * Powers the TF-Luna module (VCC)
+   2. Pin 6 (GND)
+
+      * Common ground reference for the laser MOSFET (MOSFET Source)
+      * TF-Luna ground (GND)
+      3. Pin 7 (GPIO4)
+
+         * Drives the laser MOSFET gate through a 220 Ω resistor
+         * A 10 kΩ resistor goes between the gate (on the MOSFET side of the 220 Ω resistor) and source (GND) to ensure the MOSFET is pulled low when GPIO4 is not driven
+         4. Pin 8 (GPIO14, UART TX)
+
+            * Transmits serial data to TF-Luna (connect to TF-Luna RX)
+            5. Pin 10 (GPIO15, UART RX)
+
+               * Receives serial data from TF-Luna (connect to TF-Luna TX)
+________________
+
+
+MOSFET Connections for the Laser
+Assuming a typical 3-pin N-channel MOSFET:
+               1. Gate (G)
+
+                  * Connected to GPIO4 (pin 7 on Pi) via a 220 Ω resistor
+                  * Also has a 10 kΩ resistor from Gate to Source (G → S) to pull the gate low when GPIO4 is inactive
+                  2. Drain (D)
+
+                     * Connected to negative side of the laser diode
+                     3. Source (S)
+
+                        * Connected to GND (pin 6 on Pi)
+                        4. Laser Power
+
+                           * Positive side of the laser diode → 5 V (pin 2 on Pi)
+________________
+
+
+TF-Luna Sensor
+                           1. VCC
+
+                              * Connect to 5 V (pin 2 on Pi)
+                              2. GND
+
+                                 * Connect to GND (pin 6 on Pi)
+                                 3. RX
+
+                                    * Connect to Pi’s UART TX (pin 8, GPIO14)
+                                    4. TX
+
+                                       * Connect to Pi’s UART RX (pin 10, GPIO15)
+________________
+
+
+Summary of Signal Flow
+                                       * Power (5 V) from Pi pin 2 → Laser positive terminal → Laser negative terminal → MOSFET Drain → MOSFET Source → Pi GND (pin 6).
+                                       * GPIO4 from Pi (pin 7) → 220 Ω resistor → MOSFET Gate. A 10 kΩ resistor from Gate to Source ensures the MOSFET is fully off when GPIO4 is low.
+                                       * TF-Luna is powered by 5 V (pin 2) and shares the Pi’s ground (pin 6). Pi’s UART TX (pin 8) goes to TF-Luna RX, and Pi’s UART RX (pin 10) goes to TF-Luna TX.
+When laid out on your 72-hole breakout, group these connections so that the Pi header pins run to appropriately labeled rows/columns. For the MOSFET, place the 220 Ω and 10 kΩ resistors close to the MOSFET gate for clean routing. This ensures the laser is switched properly and the TF-Luna module communicates via UART without interference.

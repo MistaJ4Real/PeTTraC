@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="refresh" content="0;url=README.md">
+    <title>PeTTraC Installation Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+        .content {
+            margin-top: 20px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            text-align: center;
+            text-decoration: none;
+            font-size: 16px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        .instructions {
+            background-color: #f9f9f9;
+            border-left: 4px solid #4CAF50;
+            padding: 15px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>PeTTraC Installation Guide</h1>
+    
+    <div class="content">
+        <p>If you're not automatically redirected to the README, please follow these instructions:</p>
+        
+        <div class="instructions">
+            <h2>Installation on Raspberry Pi:</h2>
+            <ol>
+                <li>Copy the entire PeTTraC folder to your Raspberry Pi (via USB drive or other method)</li>
+                <li>On the Raspberry Pi, navigate to the PeTTraC folder</li>
+                <li>Right-click on <code>install_pettrac.sh</code> and select "Run in Terminal" or double-click it</li>
+                <li>When prompted, enter your password (the script needs to run with sudo privileges)</li>
+                <li>Follow the on-screen instructions to complete the installation</li>
+            </ol>
+            
+            <h3>Manual Installation:</h3>
+            <p>If the double-click installation doesn't work, you can install manually:</p>
+            <pre>sudo bash install_pettrac.sh</pre>
+            
+            <h3>After Installation:</h3>
+            <p>PeTTraC will create a desktop shortcut and can be configured to start automatically at boot.</p>
+        </div>
+        
+        <p>For more detailed instructions, please read the <a href="README.md">README.md</a> file.</p>
+    </div>
+</body>
+</html> 

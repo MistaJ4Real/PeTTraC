@@ -1,0 +1,402 @@
+﻿PiSugar3
+
+
+PiSugar 3 I2C Datasheet
+Register address:
+0x57  I2C address table 
+* In the I2C register, the retention bit is reserved for the system test interface and it is forbidden to write the data.
+* When directly modifying the I2C register, you need to read the value of the corresponding register first. Write the calculated value into this register after performing AND operation on the BIT bits that need to be modified. At the same time, make sure that only the bits that need to be modified are modified, and the values of other bits cannot be modified at will.
+Function specifications
+PiSugar 3 has many advanced power functions that can be set up, which are described below.
+Some functions can be operated on WebUI, indicating that this function does not need to be manually set up by I2C, only in WebUI. At the same time, the WebUI interface can be set up directly through the command line. The function set through the WebUI will retain the settings in the Raspberry Pi system and will not be set to the default value after restart or battery reset.
+1. Write Protection
+Register address:
+Write protection: 0x0B
+Register operation:
+can be read or written
+Operating instructions:
+When reading, 1 indicates that the PiSugar registers can be written, 0 indicates that the registers cannot be written.
+Writing 0x29 to this register will make other registers writable, and writing any other value (such as 0xff) will make other register unwritable
+The following functions are not affected by write protection Reading data.
+Feed watchdog
+TAP Button State Cleanup
+Minimum firmware version: 1.2.4
+2. External power supply detection
+Register address:
+the 7th bit of the 0X02 address
+Register operation:
+can be read or written
+Data description:
+1 means external power supply access, 0 means no external power supply
+Function description:
+It can be judged whether the external power supply is connected by querying the 7th bit of the 0X02 address. The detection is to detect whether the power input interface has voltage. If the plug is inserted but there is no power supply, it will be detected that the external power supply is not connected.
+WebUI supports reading the status.
+3. Charging switch
+Register address:
+the 6th bit of the 0X02 address
+Register operation:
+can be read or written
+Data description:
+1 is on, 0 is off
+Function description:
+When charging switch is turned on, once the external power access, the device begins charging.
+default value:
+This function will be reset to on each time the device is turned off WebUI does not support this function.
+4. Output switch
+Register address:
+the 2th bit of the 0X02 address
+Register operation:
+can be read or written
+Data description:
+1 is on, 0 is off
+Function description:
+When output switch is turned off, PiSugar does not output voltage. When output switch is turned on, PiSugar outputs 5V voltage. If the automatic hibernate function is turned on and PiSugar is turned off, the PiSugar system will immediately go into the hibernate state, and I2C will be inoperable.
+(About turning off PiSugar: The shutdown command is executed in the PiSugar-Poweroff client.)
+default value:
+This function will be reset to on each time the device is turned on. WebUI does not support this function.
+5. Output switch with delay
+Register address:
+the 5th bit of the 0X02 address. 0x09 Set Delay Time
+Register operation:
+can be read or written
+Data description:
+1 is on, 0 is off
+Function description:
+When setting the control bit to off, PiSugar will count down by the number set by 0x09 bit. When the countdown reaches 0, the system output will be turned off.
+PiSugar will not start countdown immediately after setting 0x09. Each time you use a delay, set 0x09 first, then set 0x02 to start countdown to turn off the output.
+Delay range 0-255 seconds, inaccurate timing.
+default value:
+0x09 will be reset to zero each time you restart.
+WebUI does not support this function.
+Minimum firmware version: 1.0.6
+6. Automatically resume booting when power is reconnected
+Register address:
+the 4th bit of the 0X02 address.
+Register operation:
+can be read or written.
+Data description:
+1 is on, 0 is off.
+Function description:
+a. When this function is turned on and PiSugar is turned off, once the external power supply is restored, PiSugar will automatically turn on and start the external output.
+b. When this function is turned off, once the external power supply is restored, PiSugar will charge, but will not output externally.
+If you need to awake the Raspberry Pi even when PiSugar is powered on, please refer to the SCL awakening function.
+default value:
+This function is on by default. It resets to on each time the PiSugar system is completely reset. WebUI supports this function.
+7. Anti-mistaken touch function
+Register address:
+the 3rd bit of the 0X02 address.
+Register operation:
+can be read or written.
+Data description:
+1 is on, 0 is off.
+Function description:
+a. When anti-mistaken touch function is turned on, if PiSugar shuts down, first short press the power button, and then release, the LED will indicate the current power. Next, press and hold the power button to achieve the purpose of booting. When anti-mistaken touch function is turned off, short press the power button to trigger the boot.
+b. Whether the function is turned on or not, when PiSugar is turned on, it needs to be turned off by a long press.
+c. We can judge whether the current power button is pressed by reading the last bit of the 0X02 address.
+default value:
+This function is on by default. It resets to on each time the PiSugar system is completely reset.
+WebUI does not support this function.
+8. Automatic hiberate function:
+Register address:
+the 6th bit of the 0X03 address.
+Register operation:
+can be read or written.
+Data description:
+1 is on, 0 is off.
+Function description:
+This function is related to the output switch function.
+a. When automatic hiberate function is turned on, once the output function is turned off, PiSugar will go into hiberate. At that time, I2C communication and custom switches are not available, while the power button, external power detection, RTC and timer switch machines work normally.
+b. When the automatic hiberate function is turned off, PiSugar is always on regardless of whether the output switch is off. At that time, all functions including I2C are working normally.
+c. This function can be used to maintain PiSugar's I2C communication after shutdown, so as to awake or perform other status queries.
+d. When PiSugar turns off the output but does not go into hiberate, the power consumption is 1mA default: This function is on by default, it resets to on when restarting the device.
+WebUI does not support this function.
+9. Soft shutdown function
+Register address:
+set up:he 4th bit of the 0x03 address;
+query whether to enter the soft shutdown state: the 3rd bit of the 0x03 address.
+Register operation:
+can be read or written
+Data description:
+1 is on, 0 is off
+Function description:
+The soft shutdown function is set for shutdown behavior for the power button.
+a. When the soft shutdown function is turned off, while PiSugar is working, press and hold the power button for more than 2 seconds to directly turn off the power.
+b. When the soft shutdown function is turned on, press and hold the power button will not directly turn off the output. Instead, it indicates that the system has triggered the shutdown process and should start to execute the shutdown command through the 3rd query bit of the 0x03 address.
+default value:
+This function is off by default, it resets to off when restarting.
+10. Chip temperature
+Register address:
+0X04 address.
+Register operation:
+can be read
+Data description:
+0 means -40 degrees Celsius
+Function description:
+The temperature measurement is in the range of -40 to 85 degrees Celsius. This temperature is only the temperature of the chip itself, it does not represent the temperature of the Raspberry Pi, nor does it represent the temperature of the battery.
+WebUI does not support this function.
+11. Software watchdog
+Register address:
+The function switch: the 7th bit of the 0X06 address, the watchdog reset: the 5th bit of the 0x06 address, the watchdog interval time: the 0x07 address.
+Register operation:
+can be read or written.
+Data description:
+1 is on, 0 is off.
+Writing 1 on the watchdog reset setting bit will reset the watchdog timer (kicking the dog).
+The watchdog delay is set to the register value X 2s, for example, when the register value is 0x05, the actual watchdog delay is 5X2s=10s.
+Function description:
+The software watchdog provides a watchdog other than the Raspberry Pi system, which restarts the Raspberry Pi system when the Raspberry Pi system crashes. When this function is turned on, if the watchdog timer is not reset (kicking the dog) within the software watchdog time interval, PiSugar will temporarily turn off the output to achieve the purpose of restarting the Raspberry Pi system. The operation of kicking the dog needs to be completed by the user.
+default value:
+This function is off by default. It is off by default each time it restarts.
+WebUI does not support this function.
+Operation example:
+https://github.com/PiSugar/pisugar-power-manager-rs/blob/master/scripts/SoftwareWatchdogPiSugar3.sh
+12. Boot watchdog
+Register address:
+The function switch is the 4th position of 0x06 address, the reset of boot watchdog is set to the 3rd position of 0x06 address, and the restart times of boot soft watchdog is limited to 0x0a address.
+Register operation:
+can be read or written.
+Data description:
+1 is on, 0 is off.
+Writing 1 to the boot watchdog reset setting bit will end this round(feeding the dog). The minimum restart times of the boot watchdog is 1.
+Function description:
+Provides a watchdog function that monitors whether the system is turned on properly. When the Raspberry Pi system is turned on, the dog feeding operation should be performed as soon as possible. The dog feeding operation only needs to be done once in a single start.
+If the dog is not fed for more than a minute and a half and the function is not turned off, PiSugar will power off and restart, and start the watchdog again.
+The number of restarts can be limited by 0x0a.
+Dog feeding needs to be done by the user.
+default value:
+This function is off by default. It is off by default every time the system is reset.
+WebUI does not support this function.
+Minimum firmware version: 1.0.6
+Operation example:
+https://github.com/PiSugar/pisugar-power-manager-rs/blob/master/scripts/BootWatchdogPiSugar3.sh
+13. Charging protection
+Register address:
+the 7th bit of the 0X20 address.
+Register operation:
+can be read or written.
+Data description:
+1 is on, 0 is off.
+Function description:
+PiSugar 3 provides hardware charging protection function.
+When this function is turned on, the fully charged power is approximately equivalent to 80% of the battery power, and the voltage will be limited to about 3.8V. Enabling this function will greatly extend the cycle life of the battery by about 8 times (calculated as the battery cycle life doubles for every 0.1V drop in the charge cut-off voltage). It is recommended to turn it on under long-term charging conditions.
+default value:
+This function is off by default, it resets to off when restarting.
+WebUI supports this function.
+14. SCL awakening
+Register address:
+the 3rd bit of the 0X20 address.
+Register operation:
+can be read or written.
+Data description:
+1 is on, 0 is off.
+Function description:
+This function is related to the booting function.
+When the function is turned on, the SCL pin will be pulled down once PiSugar is turned on. If the Raspberry Pi is connected to the power supply but not turned on, it will be awakened.
+default value:
+This function is off by default, it resets to off when restarting.
+WebUI does not support this function.
+15. Battery capacity reading
+Register address:
+0X22, 0X23, 0X2A
+Register operation:
+can be read
+Data description:
+0x22 is high battery voltage, 0x23 is low battery voltage. When reading, you should first arrange the two bits of data in order to get the actual voltage in mA.
+For example, if the data read are 0x10 and 0x1F, the combined result will be 0x101F=4127mV=4.127V.
+The 0X2A address is the calculated battery power percentage.
+Function description:
+WebUI can read the battery power percentage
+16. Timing boot function
+Register address:
+control bit: the 7th bit of 0x40, data address: 0x44-0x47
+Register operation:
+can be read or written.
+Data description:
+Write the control bit to 1 to turn on the timing boot function, write 0 to turn off the timing boot function. The Weekday bit ranked by bit represents from Sunday to Saturday, where 0 represents Sunday.
+Function description:
+a. When the function is turned on, PiSugar will turn on the output each time the specified time is reached.
+b. This function will not be reset due to restart.
+c. Turning off this function requires manual settings.
+WebUI supports this function
+17. Custom I2C address
+Register address:
+0x50
+Register operation:
+can be read or written.
+Data description:
+the highest bit is even parity check bit. If the number of 1 in the data is odd, the highest bit is 1, otherwise it is 0
+For example, if the data is 0x57, the binary representation is 0b010110111, and the count of 1 is 5, so the highest bit is 1, and the final date is 0xd7, the binary representation is 0b11010111
+Function description:
+Changing this register will change the operation address of I2C (0x57 by default). The change takes effect immediately.
+The I2C address range is 0x03-0x77. If date beyond the range, it will not be written successfully.
+Default value
+0xd7 (actual address 0x57). This value will not be reset whether turned off or reset the system. So if you want change it, make sure you know what are you doing.
+WebUI not supports this function
+If you want to change the I2C address of WebUI, you can modify i2c_addr of /etc/pisugar-server/config.json
+If the i2c_addr isn't in your file, you can add it.
+For example, the address is 0x30: "i2c_addr"= 48,
+Minimum firmware version: 1.0.6
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+PiSugar 3 Series
+Jdaie edited this page on Feb 16 · 37 revisions
+PiSugar3 is the third generation of PiSugar, making Raspberry Pi a portable device. With an standalone MCU, PiSugar3 supports more powerful features.
+Power-On
+The PiSugar 3 has the accidental touch prevention feature enabled by default.
+The power-on method is to short press and then long press.
+Software Installation
+Run the following script on your pi:
+wget https://cdn.pisugar.com/release/pisugar-power-manager.sh
+bash pisugar-power-manager.sh -c release
+
+
+After finished, you can manage the battery by visiting http://<your raspberry ip>:8421 in your browser.
+  
+
+PiSugar Power Manager is develop in Rust and Vue2.0, with high performace (less than 2% pi0 cpu) and exquisite designed webUI.
+User Guide: https://github.com/PiSugar/PiSugar/wiki/PiSugar-Power-Manager-(Software)
+New Features
+⭐️ Full functions UPS
+PiSugar 3 has full UPS functions and can set up multiple awakening methods to meet various unique project needs.
+PiSugar 3 keeps running/working when external power is connecting or disconnecting to avoid data loss. PiSugar 3 can infer whether the external power supply is powered, whether the external power supply is disconnected, and also the battery voltage status through the data interface. Users can determine if they need to actively shut down for data protection and can set the device to automatically turn on when the external power supply is restored. With the combination of the above functions, the device can keep running as long as possible on the premise of safety.
+⭐️ OTA firmware upgrade
+A new design based on the feedback of PiSugar2, using independent MCU control to achieve communication and functions. The device firmware can be upgraded without any additional equipment. Only with a simple demand, firmware upgrades can be achieved through Raspberry Pi, letting the device get new features at any time.
+You can use following command to update the firmware of PiSugar3 (lastest:1.3.4):
+curl https://cdn.pisugar.com/release/PiSugarUpdate.sh | sudo bash
+
+
+⭐️ Hardware battery protection
+PiSugar 3 provides hardware battery protection like never before, limiting battery voltage to nearly 80%. When charging protection is turned on, the battery cycles life can be improved.
+⭐️ I2C control, mutable address
+PiSugar 3 communicates with the Raspberry Pi through the I2C interface and is compatible with most I2C devices. In addition, the I2C communication address can be customized to avoid I2C address conflicts.
+⭐️ Software watchdog
+PiSugar 3 has a software watchdog function. When the function is turned on, the dog needs to be kicked regularly, which can effectively prevent the Raspberry Pi from crashing and improve the reliability of the system.
+⭐️ Anti-Mistaken Touch Switch
+Click and hold the power button to turn on/off. This feature can be turn off in software.
+Other Features
+   * Back contact, easy to install, does not occupy GPIO
+PiSugar 3 continues to use the pogo pin design to connect with Raspberry Pi from the back. In this way, it does not occupy the GPIO and is compatible with other GPIO devices.
+TypeC charging interface
+Both the PiSugar 3 and PiSugar 3 Plus have TypeC charging port. PiSugar3 Plus has an alternative micro-USB charging port.
+      * Onboard RTC
+With the ultra-low power consumption design, the onboard RTC can keep the clock running for more than one year when PiSugar is off.
+      * Soft shutdown
+Hardware events trigger software shutdown.
+      * Custom button
+      * WebUI
+Electrical Specifications
+Electrical Specifications
+	PiSugar 3 Plus
+	PiSugar 3
+	Input
+	5V-3Amax
+	5V-3Amax
+	Output
+	5V-3Amax
+	5V-2.5Amax
+	Battery capacity
+	5000mah
+	1200mah
+	Communication interface
+	0x57/0x68 address
+	0x57/0x68 address
+	Size of PCB
+	65mmX56mm
+	65mmX30mm
+	PCB instructions
+PiSugar3
+  
+
+PiSugar3 Plus
+  
+
+Position
+	Name
+	Description
+	1
+	GND
+	PiSugar's GND, 0V, all GNDs are connected, if connected to the Raspberry Pi, also directly to the Raspberry Pi's GND
+	2
+	BAT
+	Battery Positive, 3V-4,2V
+	3
+	USB Input
+	Input voltage 4.5V-5.2V
+	4
+	Custom function button
+	
+
+	5
+	Power button
+	
+
+	6
+	System reset button
+	Use when the hardware is in abnormal state, short press will reset PiSugar
+	7
+	Extension Interface
+	5V Output, GND, MDAT/MSCL: I2C main interface, no function at this time. SDAT/SSCL: I2C slave interface, connected to Pi's I2C interface.
+	8
+	5V Input Pad
+	Connect to USB interface 5V input
+	9
+	Custom Button Pad
+	Trigger custom button function when connected to BAT(PAD:2)
+	10
+	Power Button Pad
+	Trigger power button function when connected to BAT(PAD:2)
+	11
+	5V Output Pad
+	Connected to system 5V output, connected to Raspberry Pi 5V
+	         * Note: the small round button on the board is for reseting the hardware. It's not an activation button as that on PiSugar 2.
+I2C Datasheet
+For more details, please refer to PiSugar 3 I2C Datasheet.
+RTC on board
+PiSugar 3 have an RTC on board, which can easily use by hwclock.
+Function description
+address: 0x68 as same as ds3231
+Data description: The clock part is consistent with ds3231
+Using tutorials
+Take Raspberry Pi OS kernel version: 5.15 as an example, for other system versions, please refer to the operating instructions of ds3231
+         1. Open I2C port
+         2. Upgrade pisugar firmware to the latest version
+         3. Write the following to the /boot/config file:
+dtoverlay=i2c-rtc,ds3231
+The modified file should look like this:
+  
+         4. Restart the system
+After the above steps, RTC should have been mounted with the system,you can use the following instructions to verify:
+Use the following command to view the I2C mounting:
+i2cdetect -y 1
+As a result, the UU mark can be seen at 0x68, indicating that it has been occupied by the system
+pi@PI4B:~ $ i2cdetect -y 1
+     0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f
+00:          -- -- -- -- -- -- -- -- -- -- -- -- -- 
+10: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+20: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+30: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+40: -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- -- 
+50: -- -- -- -- -- -- -- 57 -- -- -- -- -- -- -- -- 
+60: -- -- -- -- -- -- -- -- UU -- -- -- -- -- -- -- 
+70: -- -- -- -- -- -- -- --                         
+
+
+Then you can use the hwclock command
+pi@PI4B:~ $ sudo hwclock -r
+2020-01-22 08:00:27.671798+08:00
+pi@PI4B:~ $ sudo hwclock -w
+pi@PI4B:~ $ sudo hwclock -r
+2022-08-31 13:14:31.619253+08:00
+pi@PI4B:~ $
